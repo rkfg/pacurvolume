@@ -19,6 +19,7 @@ using namespace std;
 
 class TUI {
 private:
+    const string title = "PulseAudio Volume Control";
     PAWrapper* sink_wrapper;
     vector<Panel> panels;
     vector<Sink> sinks;

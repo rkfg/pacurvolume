@@ -19,7 +19,7 @@ TUI::TUI(PAWrapper* sink_wrapper) {
     noecho();
     timeout(100);
     curs_set(0);
-    box(stdscr, 0, 0);
+    redraw_screen();
 }
 
 void TUI::redraw_screen() {
@@ -28,6 +28,7 @@ void TUI::redraw_screen() {
     clear();
     resize_term(y, x);
     box(stdscr, 0, 0);
+    mvprintw(0, (x - title.length()) / 2, title.c_str());
 }
 
 bool TUI::handle_keys() {
