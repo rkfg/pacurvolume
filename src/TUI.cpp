@@ -75,7 +75,11 @@ void TUI::create_panel(int x, int y, int w, int h, string name, long value) {
 }
 
 void TUI::update_focus() {
-    for (int i = 0; i < panels.size(); i++) {
+    int panels_number = panels.size();
+    if (selected >= panels_number) {
+        selected = panels_number - 1;
+    }
+    for (int i = 0; i < panels_number; i++) {
         panels[i].select(i == selected);
     }
 }
@@ -90,10 +94,10 @@ void TUI::update_panels(bool full) {
         panels.push_back(panel);
         y += 4;
     }
-    update_focus();
     if (full) {
         redraw_screen();
     }
+    update_focus();
     draw_windows();
 }
 
