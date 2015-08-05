@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
-set(CMAKE_CXX_FLAGS -std=c++11)
 project (pacurvolume)
 add_executable(pacurvolume src/main.cpp src/PAWrapper.cpp src/TUI.cpp src/Panel.cpp)
+target_compile_features(pacurvolume PRIVATE cxx_range_for)
 find_library(pulse pulse)
 find_library(ncurses ncurses)
 target_link_libraries(pacurvolume ${pulse} ${ncurses})
