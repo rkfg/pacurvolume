@@ -129,7 +129,7 @@ Sink PAWrapper::wrap_sink(pa_sink_input_info sink) {
             pa_context_get_client_info(context, sink.client, client_info_cb,
                     this));
     pa_threaded_mainloop_unlock(mainloop);
-    return Sink { sink.index, client_name + ": " + sink_name,
+    return Sink { sink.index, client_name + (!sink_name.empty() ? ": " + sink_name : ""),
             sink.volume.values[0] };
 }
 
