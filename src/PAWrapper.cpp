@@ -113,8 +113,24 @@ vector<Sink> PAWrapper::list_sinks() {
     return result;
 }
 
+void client_info_cb(pa_context *c, const pa_client_info*i, int eol,
+        void *userdata) {
+    if (i != NULL) {
+        get_object(userdata)->set_client_name(i->name);
+    } else {
+        complete(userdata);
+    }
+}
+
 Sink PAWrapper::wrap_sink(pa_sink_input_info sink) {
-    return Sink { sink.index, string(sink.name), sink.volume.values[0] };
+    string sink_name = string(sink.name);
+    pa_threaded_mainloop_lock(mainloop);
+    wait(
+            pa_context_get_client_info(context, sink.client, client_info_cb,
+                    this));
+    pa_threaded_mainloop_unlock(mainloop);
+    return Sink { sink.index, client_name + ": " + sink_name,
+            sink.volume.values[0] };
 }
 
 void PAWrapper::wait(pa_operation* o, bool debug) {
@@ -152,6 +168,10 @@ Sink PAWrapper::change_volume(unsigned int index, int change, bool inc) {
 
 void PAWrapper::set_external_change() {
     external_change = true;
+}
+
+void PAWrapper::set_client_name(const char* name) {
+    client_name = string(name);
 }
 
 bool PAWrapper::get_external_change() {

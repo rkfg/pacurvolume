@@ -34,6 +34,7 @@ private:
     pa_context* context;
     map<uint32_t, pa_sink_input_info> sinks;
     Sink wrap_sink(pa_sink_input_info sink);
+    string client_name;
     friend void complete(void* userdata);
     void wait(pa_operation* o, bool debug = false);
     volatile bool external_change = false;
@@ -49,6 +50,7 @@ public:
     unsigned int get_sinks_count();
     vector<Sink> list_sinks();
     Sink change_volume(unsigned int index, int change, bool inc);
+    void set_client_name(const char* name);
     void set_external_change();
     bool get_external_change();
 };
