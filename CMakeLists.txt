@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 project (pacurvolume)
 add_executable(pacurvolume src/main.cpp src/PAWrapper.cpp src/TUI.cpp src/Panel.cpp)
-target_compile_features(pacurvolume PRIVATE cxx_range_for)
+add_definitions(-std=c++11)
 find_package(PulseAudio REQUIRED)
 find_package(Curses REQUIRED)
 target_link_libraries(pacurvolume ${PULSEAUDIO_LIBRARY} ${CURSES_LIBRARIES})
