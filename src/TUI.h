@@ -37,7 +37,6 @@ public:
     TUI(shared_ptr<PAWrapper> psink_wrapper);
     bool handle_keys();
     void draw_windows();
-    void create_panel(int x, int y, int w, int h, string name, long value);
     void update_focus();
     void run();
     virtual ~TUI();

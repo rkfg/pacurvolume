@@ -71,9 +71,6 @@ void TUI::draw_windows() {
     refresh();
 }
 
-void TUI::create_panel(int x, int y, int w, int h, string name, long value) {
-}
-
 void TUI::update_focus() {
     int panels_number = panels.size();
     selection.set_pos_count(panels_number);
