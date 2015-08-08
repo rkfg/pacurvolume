@@ -19,6 +19,7 @@
 #include <map>
 #include <string>
 #include <assert.h>
+#include <memory>
 
 using namespace std;
 
@@ -28,12 +29,14 @@ struct Sink {
     pa_volume_t volume;
 };
 
+typedef shared_ptr<Sink> PSink;
+
 class PAWrapper {
 private:
     pa_threaded_mainloop* mainloop;
     pa_context* context;
     map<uint32_t, pa_sink_input_info> sinks;
-    Sink wrap_sink(pa_sink_input_info sink);
+    PSink wrap_sink(pa_sink_input_info sink);
     string client_name;
     friend void complete(void* userdata);
     void wait(pa_operation* o, bool debug = false);
@@ -48,8 +51,8 @@ public:
     void add_sink(const pa_sink_input_info sink);
     void refresh_sink(uint32_t idx);
     unsigned int get_sinks_count();
-    vector<Sink> list_sinks();
-    Sink change_volume(unsigned int index, int change, bool inc);
+    shared_ptr<vector<PSink>> list_sinks();
+    PSink change_volume(unsigned int index, int change, bool inc);
     void set_client_name(const char* name);
     void set_external_change();
     bool get_external_change();

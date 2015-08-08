@@ -7,8 +7,8 @@
 
 #include "TUI.h"
 
-TUI::TUI(PAWrapper* sink_wrapper) {
-    this->sink_wrapper = sink_wrapper;
+TUI::TUI(shared_ptr<PAWrapper> psink_wrapper) :
+        sink_wrapper(psink_wrapper) {
     signal(SIGINT, finish);
     initscr();
     start_color();
@@ -52,12 +52,14 @@ bool TUI::handle_keys() {
         update_focus();
         break;
     case KEY_RIGHT:
-    case KEY_LEFT:
-        get_selected_panel().update_sink(
-                sink_wrapper->change_volume(sinks[selected].idx, 1024,
+    case KEY_LEFT: {
+        PPanel selectedPanel = get_selected_panel();
+        selectedPanel->update_sink(
+                sink_wrapper->change_volume((*sinks)[selected]->idx, 1024,
                         c == KEY_RIGHT));
         draw_windows();
         break;
+    }
     case 'q':
         return false;
     }
@@ -65,8 +67,8 @@ bool TUI::handle_keys() {
 }
 
 void TUI::draw_windows() {
-    for (Panel panel : panels) {
-        panel.redraw();
+    for (PPanel panel : panels) {
+        panel->redraw();
     }
     refresh();
 }
@@ -79,8 +81,11 @@ void TUI::update_focus() {
     if (selected >= panels_number) {
         selected = panels_number - 1;
     }
+    if (selected < 0 && panels_number > 0) {
+        selected = 0;
+    }
     for (int i = 0; i < panels_number; i++) {
-        panels[i].select(i == selected);
+        panels[i]->select(i == selected);
     }
 }
 
@@ -89,8 +94,8 @@ void TUI::update_panels(bool full) {
     int y = 2;
     sinks = sink_wrapper->list_sinks();
     panels.clear();
-    for (Sink sink : sinks) {
-        Panel panel = Panel(2, y, 50, 3, sink);
+    for (PSink sink : *sinks) {
+        PPanel panel = PPanel(new Panel(2, y, 50, 3, sink));
         panels.push_back(panel);
         y += 4;
     }
@@ -113,7 +118,10 @@ void TUI::run() {
     }
 }
 
-Panel& TUI::get_selected_panel() {
+PPanel TUI::get_selected_panel() {
+    if (selected < 0) {
+        return nullptr;
+    }
     return panels[selected];
 }
 

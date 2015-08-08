@@ -17,16 +17,20 @@
 
 using namespace std;
 
+class Panel;
+
+typedef shared_ptr<Panel> PPanel;
+
 class Panel {
 private:
     WINDOW* window;
-    Sink sink;
+    PSink psink;
     bool selected = false;
 public:
-    Panel(int x, int y, int w, int h, Sink sink);
+    Panel(int x, int y, int w, int h, PSink psink);
     void redraw();
     void select(bool selected);
-    void update_sink(Sink sink);
+    void update_sink(PSink psink);
     virtual ~Panel();
 };
 

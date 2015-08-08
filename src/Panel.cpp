@@ -7,20 +7,20 @@
 
 #include "Panel.h"
 
-Panel::Panel(int x, int y, int w, int h, Sink sink) {
+Panel::Panel(int x, int y, int w, int h, PSink psink) {
     window = subwin(stdscr, h, w, y, x);
-    this->sink = sink;
+    this->psink = psink;
     redraw();
 }
 
 void Panel::redraw() {
     box(window, 0, 0);
-    mvwprintw(window, 0, 1, sink.name.c_str());
+    mvwprintw(window, 0, 1, psink->name.c_str());
     if (selected) {
         wattron(window, COLOR_PAIR(1));
     }
-    long vol = sink.volume * (getmaxx(window) - 1) / PA_VOLUME_UI_MAX;
-    long volperc = sink.volume * 100 / PA_VOLUME_NORM;
+    long vol = psink->volume * (getmaxx(window) - 1) / PA_VOLUME_UI_MAX;
+    long volperc = psink->volume * 100 / PA_VOLUME_NORM;
     for (int i = 1; i < vol; i++) {
         mvwaddch(window, 1, i, BLOCK);
     }
@@ -39,8 +39,8 @@ void Panel::select(bool selected) {
     redraw();
 }
 
-void Panel::update_sink(Sink sink) {
-    this->sink = sink;
+void Panel::update_sink(PSink psink) {
+    this->psink = psink;
     redraw();
 }
 

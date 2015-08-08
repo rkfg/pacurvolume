@@ -105,10 +105,11 @@ unsigned int PAWrapper::get_sinks_count() {
     return sinks.size();
 }
 
-vector<Sink> PAWrapper::list_sinks() {
-    vector<Sink> result;
+shared_ptr<vector<PSink>> PAWrapper::list_sinks() {
+    shared_ptr<vector<PSink>> result = shared_ptr<vector<PSink>>(
+            new vector<PSink>);
     for (pair<uint32_t, pa_sink_input_info> sink : sinks) {
-        result.push_back(wrap_sink(sink.second));
+        result->push_back(wrap_sink(sink.second));
     }
     return result;
 }
@@ -122,15 +123,17 @@ void client_info_cb(pa_context *c, const pa_client_info*i, int eol,
     }
 }
 
-Sink PAWrapper::wrap_sink(pa_sink_input_info sink) {
+PSink PAWrapper::wrap_sink(pa_sink_input_info sink) {
     string sink_name = string(sink.name);
     pa_threaded_mainloop_lock(mainloop);
     wait(
             pa_context_get_client_info(context, sink.client, client_info_cb,
                     this));
     pa_threaded_mainloop_unlock(mainloop);
-    return Sink { sink.index, client_name + (!sink_name.empty() ? ": " + sink_name : ""),
-            sink.volume.values[0] };
+    return PSink(
+            new Sink { sink.index, client_name
+                    + (!sink_name.empty() ? ": " + sink_name : ""),
+                    sink.volume.values[0] });
 }
 
 void PAWrapper::wait(pa_operation* o, bool debug) {
@@ -149,7 +152,7 @@ void PAWrapper::refresh_sink(uint32_t idx) {
     pa_threaded_mainloop_unlock(mainloop);
 }
 
-Sink PAWrapper::change_volume(unsigned int index, int change, bool inc) {
+PSink PAWrapper::change_volume(unsigned int index, int change, bool inc) {
     pa_sink_input_info sink = sinks[index];
     pa_cvolume* pvol;
     if (inc) {

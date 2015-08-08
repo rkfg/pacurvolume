@@ -20,20 +20,20 @@ using namespace std;
 class TUI {
 private:
     const string title = "PulseAudio Volume Control";
-    PAWrapper* sink_wrapper;
-    vector<Panel> panels;
-    vector<Sink> sinks;
+    shared_ptr<PAWrapper> sink_wrapper;
+    vector<PPanel> panels;
+    shared_ptr<vector<PSink>> sinks;
     int selected = 0;
     static void finish(int sig) {
         endwin();
         exit(0);
     }
-    Panel& get_selected_panel();
+    PPanel get_selected_panel();
     void update_panels(bool full = false);
     void redraw_screen();
 
 public:
-    TUI(PAWrapper* sink_wrapper);
+    TUI(shared_ptr<PAWrapper> psink_wrapper);
     bool handle_keys();
     void draw_windows();
     void create_panel(int x, int y, int w, int h, string name, long value);
