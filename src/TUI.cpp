@@ -40,15 +40,11 @@ bool TUI::handle_keys() {
         draw_windows();
         break;
     case KEY_UP:
-        if (--selected < 0) {
-            selected = 0;
-        }
+        selection.dec();
         update_focus();
         break;
     case KEY_DOWN:
-        if (++selected >= sinksCount) {
-            selected = sinksCount - 1;
-        }
+        selection.inc();
         update_focus();
         break;
     case KEY_RIGHT:
@@ -56,7 +52,7 @@ bool TUI::handle_keys() {
         PPanel selectedPanel = get_selected_panel();
         if (selectedPanel != nullptr) {
             selectedPanel->update_sink(
-                    sink_wrapper->change_volume((*sinks)[selected]->idx, 1024,
+                    sink_wrapper->change_volume((*sinks)[selection.get_selected()]->idx, 1024,
                             c == KEY_RIGHT));
             draw_windows();
         }
@@ -80,12 +76,8 @@ void TUI::create_panel(int x, int y, int w, int h, string name, long value) {
 
 void TUI::update_focus() {
     int panels_number = panels.size();
-    if (selected >= panels_number) {
-        selected = panels_number - 1;
-    }
-    if (selected < 0 && panels_number > 0) {
-        selected = 0;
-    }
+    selection.set_pos_count(panels_number);
+    int selected = selection.get_selected();
     for (int i = 0; i < panels_number; i++) {
         panels[i]->select(i == selected);
     }
@@ -121,6 +113,7 @@ void TUI::run() {
 }
 
 PPanel TUI::get_selected_panel() {
+    int selected = selection.get_selected();
     if (selected < 0) {
         return nullptr;
     }

@@ -14,16 +14,17 @@
 #include <vector>
 #include "Panel.h"
 #include "PAWrapper.h"
+#include "Selection.h"
 
 using namespace std;
 
 class TUI {
 private:
+    Selection selection;
     const string title = "PulseAudio Volume Control";
     shared_ptr<PAWrapper> sink_wrapper;
     vector<PPanel> panels;
     shared_ptr<vector<PSink>> sinks;
-    int selected = 0;
     static void finish(int sig) {
         endwin();
         exit(0);
