@@ -54,10 +54,12 @@ bool TUI::handle_keys() {
     case KEY_RIGHT:
     case KEY_LEFT: {
         PPanel selectedPanel = get_selected_panel();
-        selectedPanel->update_sink(
-                sink_wrapper->change_volume((*sinks)[selected]->idx, 1024,
-                        c == KEY_RIGHT));
-        draw_windows();
+        if (selectedPanel != nullptr) {
+            selectedPanel->update_sink(
+                    sink_wrapper->change_volume((*sinks)[selected]->idx, 1024,
+                            c == KEY_RIGHT));
+            draw_windows();
+        }
         break;
     }
     case 'q':
