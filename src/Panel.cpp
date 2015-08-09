@@ -7,13 +7,18 @@
 
 #include "Panel.h"
 
-Panel::Panel(int x, int y, int w, int h, PSink psink) {
-    window = subwin(stdscr, h, w, y, x);
+Panel::Panel(int pos, int w, int h, PSink psink, shared_ptr<Selection> sel) {
+    this->pos = pos;
+    this->height = h;
+    this->width = w;
+    window = newwin(h, w, pos_to_y(pos), 1);
     this->psink = psink;
+    this->sel = sel;
     redraw();
 }
 
 void Panel::redraw() {
+    mvwin(window, pos_to_y(pos - sel->getVisibleStart()), 1);
     box(window, 0, 0);
     mvwprintw(window, 0, 1,
             psink->name.substr(0, width - 2).c_str());
@@ -37,12 +42,15 @@ void Panel::redraw() {
 
 void Panel::select(bool selected) {
     this->selected = selected;
-    redraw();
 }
 
 void Panel::update_sink(PSink psink) {
     this->psink = psink;
     redraw();
+}
+
+int Panel::pos_to_y(int pos) {
+    return pos * (height + 1) + 2;
 }
 
 Panel::~Panel() {

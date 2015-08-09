@@ -20,7 +20,7 @@ using namespace std;
 
 class TUI {
 private:
-    Selection selection;
+    PSelection selection = PSelection(new Selection);
     const string title = "PulseAudio Volume Control";
     shared_ptr<PAWrapper> sink_wrapper;
     vector<PPanel> panels;
@@ -31,7 +31,7 @@ private:
     }
     PPanel get_selected_panel();
     void update_panels(bool full = false);
-    void redraw_screen();
+    void redraw_root();
 
 public:
     TUI(shared_ptr<PAWrapper> psink_wrapper);

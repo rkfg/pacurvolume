@@ -14,6 +14,7 @@
 #include <ncurses.h>
 #include <pulse/volume.h>
 #include "PAWrapper.h"
+#include "Selection.h"
 
 using namespace std;
 
@@ -26,8 +27,11 @@ private:
     WINDOW* window;
     PSink psink;
     bool selected = false;
+    int pos, height, width;
+    int pos_to_y(int pos);
+    PSelection sel;
 public:
-    Panel(int x, int y, int w, int h, PSink psink);
+    Panel(int pos, int w, int h, PSink psink, PSelection sel);
     void redraw();
     void select(bool selected);
     void update_sink(PSink psink);

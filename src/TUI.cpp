@@ -19,16 +19,17 @@ TUI::TUI(shared_ptr<PAWrapper> psink_wrapper) :
     noecho();
     timeout(100);
     curs_set(0);
-    redraw_screen();
 }
 
-void TUI::redraw_screen() {
+void TUI::redraw_root() {
     int y, x;
     getmaxyx(stdscr, y, x);
     clear();
     resize_term(y, x);
     box(stdscr, 0, 0);
     mvprintw(0, (x - title.length()) / 2, title.c_str());
+    selection->set_height(y);
+    refresh();
 }
 
 bool TUI::handle_keys() {
@@ -36,15 +37,15 @@ bool TUI::handle_keys() {
     unsigned int sinksCount = sink_wrapper->get_sinks_count();
     switch (c) {
     case KEY_RESIZE:
-        redraw_screen();
+        redraw_root();
         draw_windows();
         break;
     case KEY_UP:
-        selection.dec();
+        selection->dec();
         update_focus();
         break;
     case KEY_DOWN:
-        selection.inc();
+        selection->inc();
         update_focus();
         break;
     case KEY_RIGHT:
@@ -52,9 +53,10 @@ bool TUI::handle_keys() {
         PPanel selectedPanel = get_selected_panel();
         if (selectedPanel != nullptr) {
             selectedPanel->update_sink(
-                    sink_wrapper->change_volume((*sinks)[selection.get_selected()]->idx, 1024,
+                    sink_wrapper->change_volume(
+                            (*sinks)[selection->get_selected()]->idx, 1024,
                             c == KEY_RIGHT));
-            draw_windows();
+            //draw_windows();
         }
         break;
     }
@@ -65,40 +67,41 @@ bool TUI::handle_keys() {
 }
 
 void TUI::draw_windows() {
-    for (PPanel panel : panels) {
-        panel->redraw();
-    }
     refresh();
+    selection->move_to_view();
+    for (int i = selection->getVisibleStart(); i < selection->getVisibleEnd();
+            i++) {
+        panels[i]->redraw();
+    }
 }
 
 void TUI::update_focus() {
     int panels_number = panels.size();
-    selection.set_pos_count(panels_number);
-    int selected = selection.get_selected();
+    int selected = selection->get_selected();
     for (int i = 0; i < panels_number; i++) {
         panels[i]->select(i == selected);
     }
+    draw_windows();
 }
 
 void TUI::update_panels(bool full) {
     sink_wrapper->collect_sinks();
-    int y = 2;
+    int pos = 0;
     sinks = sink_wrapper->list_sinks();
+    selection->set_pos_count(sinks->size());
     panels.clear();
     for (PSink sink : *sinks) {
-        PPanel panel = PPanel(new Panel(2, y, 50, 3, sink));
+        PPanel panel = PPanel(new Panel(pos++, 50, 3, sink, selection));
         panels.push_back(panel);
-        y += 4;
     }
     if (full) {
-        redraw_screen();
+        redraw_root();
     }
     update_focus();
-    draw_windows();
 }
 
 void TUI::run() {
-    update_panels();
+    update_panels(true);
     for (;;) {
         if (!handle_keys()) {
             break;
@@ -110,7 +113,7 @@ void TUI::run() {
 }
 
 PPanel TUI::get_selected_panel() {
-    int selected = selection.get_selected();
+    int selected = selection->get_selected();
     if (selected < 0) {
         return nullptr;
     }
