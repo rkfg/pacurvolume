@@ -15,7 +15,8 @@ Panel::Panel(int x, int y, int w, int h, PSink psink) {
 
 void Panel::redraw() {
     box(window, 0, 0);
-    mvwprintw(window, 0, 1, psink->name.c_str());
+    mvwprintw(window, 0, 1,
+            psink->name.substr(0, width - 2).c_str());
     if (selected) {
         wattron(window, COLOR_PAIR(1));
     }
