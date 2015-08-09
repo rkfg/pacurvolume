@@ -22,6 +22,9 @@ void Panel::redraw() {
     if (target_y != getpary(window)) {
         mvwin(window, target_y, 1);
     }
+    if (getmaxx(window) != width) {
+        wresize(window, height, width);
+    }
     box(window, 0, 0);
     if (selected) {
         wattron(window, COLOR_PAIR(1));

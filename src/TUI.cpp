@@ -29,6 +29,10 @@ void TUI::redraw_root() {
     box(stdscr, 0, 0);
     mvprintw(0, (x - title.length()) / 2, title.c_str());
     selection->set_height(y);
+    for (PPanel panel : panels) {
+        panel->setWidth(x - 2);
+        panel->redraw();
+    }
     refresh();
 }
 
