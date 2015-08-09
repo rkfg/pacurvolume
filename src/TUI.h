@@ -30,7 +30,7 @@ private:
         exit(0);
     }
     PPanel get_selected_panel();
-    void update_panels(bool full = false);
+    void update_panels();
     void redraw_root();
 
 public:

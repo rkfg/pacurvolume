@@ -32,7 +32,6 @@ void Selection::set_pos_count(int pos_count) {
     if (selected < 0 && pos_count > 0) {
         selected = 0;
     }
-    debug();
 }
 
 int Selection::get_selected() {
@@ -49,14 +48,9 @@ void Selection::move_to_view() {
     }
     visible_start += shift;
     visible_end += shift;
-    debug();
 }
 
 Selection::~Selection() {
-}
-
-void Selection::debug() {
-    mvwprintw(stdscr, 1, 1, "Start: %d End: %d", visible_start, visible_end);
 }
 
 void Selection::set_height(int h) {
@@ -69,7 +63,6 @@ void Selection::set_height(int h) {
     } else {
         visible_end = visible_start + min(need, available);
     }
-    debug();
 }
 
 bool Selection::is_visible(int idx) {

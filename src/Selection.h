@@ -33,7 +33,6 @@ public:
     void set_height(int h);
     bool is_visible(int idx);
     void move_to_view();
-    void debug();
     virtual ~Selection();
 
     int getVisibleEnd() const {

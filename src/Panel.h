@@ -36,6 +36,10 @@ public:
     void select(bool selected);
     void update_sink(PSink psink);
     virtual ~Panel();
+
+    void setWidth(int width) {
+        this->width = width;
+    }
 };
 
 #endif /* SRC_PANEL_H_ */

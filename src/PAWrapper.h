@@ -25,30 +25,34 @@ using namespace std;
 
 struct Sink {
     uint32_t idx;
+    uint32_t client_idx;
     string name;
-    pa_volume_t volume;
+    string sink_name;
+    string client_name;
+    pa_cvolume volume;
 };
 
 typedef shared_ptr<Sink> PSink;
+typedef shared_ptr<pa_sink_input_info> PSinkInfo;
 
 class PAWrapper {
 private:
     pa_threaded_mainloop* mainloop;
     pa_context* context;
-    map<uint32_t, pa_sink_input_info> sinks;
-    PSink wrap_sink(pa_sink_input_info sink);
+    map<uint32_t, PSink> sinks;
+    PSink wrap_sink(PSinkInfo sink);
     string client_name;
+    string app_name;
     friend void complete(void* userdata);
     void wait(pa_operation* o, bool debug = false);
     volatile bool external_change = false;
 public:
-    PAWrapper(const char* client_name = "myapp");
+    PAWrapper(string app_name = "myapp");
     virtual ~PAWrapper();
     friend void sink_input_info_list_cb(pa_context *c,
             const pa_sink_input_info *i, int eol, void *userdata);
-    void print_sinks();
     void collect_sinks();
-    void add_sink(const pa_sink_input_info sink);
+    void add_sink(const PSinkInfo sink);
     void refresh_sink(uint32_t idx);
     unsigned int get_sinks_count();
     shared_ptr<vector<PSink>> list_sinks();

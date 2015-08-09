@@ -56,7 +56,6 @@ bool TUI::handle_keys() {
                     sink_wrapper->change_volume(
                             (*sinks)[selection->get_selected()]->idx, 1024,
                             c == KEY_RIGHT));
-            //draw_windows();
         }
         break;
     }
@@ -67,12 +66,12 @@ bool TUI::handle_keys() {
 }
 
 void TUI::draw_windows() {
-    refresh();
     selection->move_to_view();
     for (int i = selection->getVisibleStart(); i < selection->getVisibleEnd();
             i++) {
         panels[i]->redraw();
     }
+    refresh();
 }
 
 void TUI::update_focus() {
@@ -84,7 +83,7 @@ void TUI::update_focus() {
     draw_windows();
 }
 
-void TUI::update_panels(bool full) {
+void TUI::update_panels() {
     sink_wrapper->collect_sinks();
     int pos = 0;
     sinks = sink_wrapper->list_sinks();
@@ -94,20 +93,18 @@ void TUI::update_panels(bool full) {
         PPanel panel = PPanel(new Panel(pos++, 50, 3, sink, selection));
         panels.push_back(panel);
     }
-    if (full) {
-        redraw_root();
-    }
+    redraw_root();
     update_focus();
 }
 
 void TUI::run() {
-    update_panels(true);
+    update_panels();
     for (;;) {
         if (!handle_keys()) {
             break;
         }
         if (sink_wrapper->get_external_change()) {
-            update_panels(true);
+            update_panels();
         }
     }
 }
