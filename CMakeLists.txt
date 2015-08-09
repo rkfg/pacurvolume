@@ -1,4 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")
+set(CURSES_NEED_WIDE TRUE)
 project (pacurvolume)
 add_executable(pacurvolume src/main.cpp src/PAWrapper.cpp src/TUI.cpp src/Panel.cpp src/Selection.cpp)
 add_definitions(-std=c++11)

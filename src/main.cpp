@@ -12,10 +12,10 @@
 using namespace std;
 
 int main(void) {
+    setlocale(LC_CTYPE, "");
     shared_ptr<PAWrapper> wrapper = shared_ptr<PAWrapper>(
             new PAWrapper("ncurses volume app"));
     TUI tui(wrapper);
     tui.run();
     return EXIT_SUCCESS;
 }
-
