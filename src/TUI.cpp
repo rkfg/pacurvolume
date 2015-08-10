@@ -17,6 +17,7 @@ TUI::TUI(shared_ptr<PAWrapper> psink_wrapper) :
     nonl();
     cbreak();
     noecho();
+    mousemask(ALL_MOUSE_EVENTS, NULL);
     timeout(100);
     curs_set(0);
 }
@@ -63,6 +64,17 @@ bool TUI::handle_keys() {
         }
         break;
     }
+    case KEY_MOUSE:
+        MEVENT event;
+        getmouse(&event);
+        if (event.bstate & BUTTON4_PRESSED) {
+            selection->dec();
+            update_focus();
+        } else if (!event.bstate && event.id == -1) {
+            selection->inc();
+            update_focus();
+        }
+        break;
     case 'q':
         return false;
     }
