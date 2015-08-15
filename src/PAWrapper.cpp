@@ -35,7 +35,7 @@ void server_info_cb(pa_context* c, const pa_server_info* i, void *userdata) {
 
 void sink_input_info_list_cb(pa_context *c, const pa_sink_input_info *i,
         int eol, void *userdata) {
-    if (i != NULL) {
+    if (i != NULL && i->has_volume) {
         get_object(userdata)->add_sink(PSinkInfo(new pa_sink_input_info(*i)));
     } else {
         complete(userdata);
