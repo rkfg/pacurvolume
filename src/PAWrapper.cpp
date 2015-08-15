@@ -192,3 +192,8 @@ PSink PAWrapper::set_volume(unsigned int index, int vol) {
     set_vol(index, pa_cvolume_set(pvol, pvol->channels, vol));
     return sinks[index];
 }
+
+PSink PAWrapper::toggle_mute(unsigned int index) {
+    pa_context_set_sink_input_mute(context, index, !sinks[index]->muted, NULL, NULL);
+    return sinks[index];
+}

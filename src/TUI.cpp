@@ -82,6 +82,8 @@ bool TUI::handle_keys() {
             PA_VOLUME_NORM));
             break;
         case '0':
+        case 'm':
+            selectedPanel->update_sink(sink_wrapper->toggle_mute(selectedIdx));
             break;
         }
     }

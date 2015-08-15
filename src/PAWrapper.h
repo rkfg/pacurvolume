@@ -60,6 +60,7 @@ public:
     shared_ptr<vector<PSink>> list_sinks();
     PSink change_volume(unsigned int index, int change, bool inc);
     PSink set_volume(unsigned int index, int vol);
+    PSink toggle_mute(unsigned int index);
     void set_client_name(const char* name);
     void set_external_change();
     bool get_external_change();
