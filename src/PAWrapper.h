@@ -45,6 +45,7 @@ private:
     string app_name;
     friend void complete(void* userdata);
     void wait(pa_operation* o, bool debug = false);
+    void set_vol(unsigned int index, pa_cvolume* pvol);
     volatile bool external_change = false;
 public:
     PAWrapper(string app_name = "myapp");
@@ -57,6 +58,7 @@ public:
     unsigned int get_sinks_count();
     shared_ptr<vector<PSink>> list_sinks();
     PSink change_volume(unsigned int index, int change, bool inc);
+    PSink set_volume(unsigned int index, int vol);
     void set_client_name(const char* name);
     void set_external_change();
     bool get_external_change();

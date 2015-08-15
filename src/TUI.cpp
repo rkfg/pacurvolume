@@ -39,6 +39,11 @@ void TUI::redraw_root() {
 
 bool TUI::handle_keys() {
     int c = getch();
+    PPanel selectedPanel = get_selected_panel();
+    int selectedIdx = -1;
+    if (selectedPanel != nullptr) {
+        selectedIdx = (*sinks)[selection->get_selected()]->idx;
+    }
     unsigned int sinksCount = sink_wrapper->get_sinks_count();
     switch (c) {
     case KEY_RESIZE:
@@ -54,16 +59,13 @@ bool TUI::handle_keys() {
         update_focus();
         break;
     case KEY_RIGHT:
-    case KEY_LEFT: {
-        PPanel selectedPanel = get_selected_panel();
+    case KEY_LEFT:
         if (selectedPanel != nullptr) {
             selectedPanel->update_sink(
-                    sink_wrapper->change_volume(
-                            (*sinks)[selection->get_selected()]->idx, 1024,
+                    sink_wrapper->change_volume(selectedIdx, 1024,
                             c == KEY_RIGHT));
         }
         break;
-    }
     case KEY_MOUSE:
         MEVENT event;
         getmouse(&event);
@@ -73,6 +75,12 @@ bool TUI::handle_keys() {
         } else if (!event.bstate && event.id == -1) {
             selection->inc();
             update_focus();
+        }
+        break;
+    case '1':
+        if (selectedPanel != nullptr) {
+            selectedPanel->update_sink(sink_wrapper->set_volume(selectedIdx,
+            PA_VOLUME_NORM));
         }
         break;
     case 'q':

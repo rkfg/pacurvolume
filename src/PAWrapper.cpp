@@ -131,8 +131,9 @@ shared_ptr<vector<PSink>> PAWrapper::list_sinks() {
 
 PSink PAWrapper::wrap_sink(PSinkInfo sink) {
     string sink_name = string(sink->name);
-    return PSink(new Sink { sink->index, sink->client, "", sink_name, "",
-            sink->volume });
+    return PSink(
+            new Sink { sink->index, sink->client, "", sink_name, "",
+                    sink->volume });
 }
 
 void PAWrapper::wait(pa_operation* o, bool debug) {
@@ -151,6 +152,15 @@ void PAWrapper::refresh_sink(uint32_t idx) {
     pa_threaded_mainloop_unlock(mainloop);
 }
 
+void PAWrapper::set_vol(unsigned int index, pa_cvolume* pvol) {
+    pa_threaded_mainloop_lock(mainloop);
+    wait(
+            pa_context_set_sink_input_volume(context, index, pvol, success_cb,
+                    this));
+    pa_threaded_mainloop_unlock(mainloop);
+    refresh_sink(index);
+}
+
 PSink PAWrapper::change_volume(unsigned int index, int change, bool inc) {
     PSink sink = sinks[index];
     pa_cvolume* pvol;
@@ -159,12 +169,7 @@ PSink PAWrapper::change_volume(unsigned int index, int change, bool inc) {
     } else {
         pvol = pa_cvolume_dec(&sink->volume, change);
     }
-    pa_threaded_mainloop_lock(mainloop);
-    wait(
-            pa_context_set_sink_input_volume(context, index, pvol, success_cb,
-                    this));
-    pa_threaded_mainloop_unlock(mainloop);
-    refresh_sink(index);
+    set_vol(index, pvol);
     return sinks[index];
 }
 
@@ -180,4 +185,10 @@ bool PAWrapper::get_external_change() {
     bool result = external_change;
     external_change = false;
     return result;
+}
+
+PSink PAWrapper::set_volume(unsigned int index, int vol) {
+    pa_cvolume* pvol = &sinks[index]->volume;
+    set_vol(index, pa_cvolume_set(pvol, pvol->channels, vol));
+    return sinks[index];
 }
