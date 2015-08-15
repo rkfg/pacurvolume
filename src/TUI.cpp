@@ -102,16 +102,26 @@ void TUI::update_focus(bool redraw) {
     bool scroll = selection->move_to_view();
 
     int prev_idx = selection->getPrevSelected();
-    PPanel prev = panels[prev_idx];
-    prev->select(false);
+    PPanel prev = nullptr;
+    PPanel sel = nullptr;
+    if (prev_idx < sinks->size()) {
+        prev = panels[prev_idx];
+        prev->select(false);
+    }
     int selected_idx = selection->get_selected();
-    PPanel sel = panels[selected_idx];
-    sel->select(true);
+    if (selected_idx < sinks->size()) {
+        sel = panels[selected_idx];
+        sel->select(true);
+    }
     if (scroll) {
         draw_windows();
     } else if (redraw) {
-        prev->redraw();
-        sel->redraw();
+        if (prev != nullptr) {
+            prev->redraw();
+        }
+        if (sel != nullptr) {
+            sel->redraw();
+        }
         doupdate();
     }
 }
