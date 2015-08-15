@@ -37,7 +37,7 @@ public:
     TUI(shared_ptr<PAWrapper> psink_wrapper);
     bool handle_keys();
     void draw_windows();
-    void update_focus();
+    void update_focus(bool redraw);
     void run();
     virtual ~TUI();
 };

@@ -9,15 +9,11 @@
 #include "ncurses.h"
 
 void Selection::dec() {
-    if (--selected < 0) {
-        selected = 0;
-    }
+    set_selected(selected - 1);
 }
 
 void Selection::inc() {
-    if (++selected >= pos_count) {
-        selected = pos_count - 1;
-    }
+    set_selected(selected + 1);
 }
 
 Selection::Selection(int pos_count, int panel_height) :
@@ -27,10 +23,10 @@ Selection::Selection(int pos_count, int panel_height) :
 void Selection::set_pos_count(int pos_count) {
     this->pos_count = pos_count;
     if (selected >= pos_count) {
-        selected = pos_count - 1;
+        set_selected(pos_count - 1);
     }
     if (selected < 0 && pos_count > 0) {
-        selected = 0;
+        set_selected(0);
     }
 }
 
@@ -38,7 +34,7 @@ int Selection::get_selected() {
     return selected;
 }
 
-void Selection::move_to_view() {
+bool Selection::move_to_view() {
     int shift = 0;
     if (selected >= visible_end && selected < pos_count) {
         shift = visible_end - selected + 1;
@@ -48,6 +44,7 @@ void Selection::move_to_view() {
     }
     visible_start += shift;
     visible_end += shift;
+    return shift != 0;
 }
 
 Selection::~Selection() {
@@ -67,4 +64,15 @@ void Selection::set_height(int h) {
 
 bool Selection::is_visible(int idx) {
     return idx >= visible_start && idx < visible_end;
+}
+
+void Selection::set_selected(int new_selected) {
+    prev_selected = selected;
+    selected = new_selected;
+    if (selected < 0) {
+        selected = 0;
+    }
+    if (selected >= pos_count) {
+        selected = pos_count - 1;
+    }
 }

@@ -32,9 +32,8 @@ void TUI::redraw_root() {
     selection->set_height(y);
     for (PPanel panel : panels) {
         panel->setWidth(x - 2);
-        panel->redraw();
     }
-    refresh();
+    wnoutrefresh(stdscr);
 }
 
 bool TUI::handle_keys() {
@@ -47,21 +46,21 @@ bool TUI::handle_keys() {
         break;
     case KEY_UP:
         selection->dec();
-        update_focus();
+        update_focus(true);
         break;
     case KEY_DOWN:
         selection->inc();
-        update_focus();
+        update_focus(true);
         break;
     case KEY_MOUSE:
         MEVENT event;
         getmouse(&event);
         if (event.bstate & BUTTON4_PRESSED) {
             selection->dec();
-            update_focus();
+            update_focus(true);
         } else if (!event.bstate && event.id == -1) {
             selection->inc();
-            update_focus();
+            update_focus(true);
         }
         break;
     case 'q':
@@ -96,16 +95,25 @@ void TUI::draw_windows() {
             i++) {
         panels[i]->redraw();
     }
-    refresh();
+    doupdate();
 }
 
-void TUI::update_focus() {
-    int panels_number = panels.size();
-    int selected = selection->get_selected();
-    for (int i = 0; i < panels_number; i++) {
-        panels[i]->select(i == selected);
+void TUI::update_focus(bool redraw) {
+    bool scroll = selection->move_to_view();
+
+    int prev_idx = selection->getPrevSelected();
+    PPanel prev = panels[prev_idx];
+    prev->select(false);
+    int selected_idx = selection->get_selected();
+    PPanel sel = panels[selected_idx];
+    sel->select(true);
+    if (scroll) {
+        draw_windows();
+    } else if (redraw) {
+        prev->redraw();
+        sel->redraw();
+        doupdate();
     }
-    draw_windows();
 }
 
 void TUI::update_panels() {
@@ -119,7 +127,8 @@ void TUI::update_panels() {
         panels.push_back(panel);
     }
     redraw_root();
-    update_focus();
+    update_focus(false);
+    draw_windows();
 }
 
 void TUI::run() {
