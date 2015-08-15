@@ -29,6 +29,7 @@ struct Sink {
     string name;
     string sink_name;
     string client_name;
+    bool muted;
     pa_cvolume volume;
 };
 

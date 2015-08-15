@@ -132,7 +132,7 @@ shared_ptr<vector<PSink>> PAWrapper::list_sinks() {
 PSink PAWrapper::wrap_sink(PSinkInfo sink) {
     string sink_name = string(sink->name);
     return PSink(
-            new Sink { sink->index, sink->client, "", sink_name, "",
+            new Sink { sink->index, sink->client, "", sink_name, "", sink->mute == 1,
                     sink->volume });
 }
 

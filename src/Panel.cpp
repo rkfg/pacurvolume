@@ -39,7 +39,8 @@ void Panel::redraw() {
         mvwaddch(window, 1, i, ' ');
     }
     wattron(window, A_BOLD);
-    mvwprintw(window, 2, 1, "Volume: %d%%", volperc);
+    string muted = psink->muted ? "[M] " : "";
+    mvwprintw(window, 2, 1, "%sVolume: %d%%", muted.c_str(), volperc);
     wattroff(window, A_BOLD);
     wattroff(window, COLOR_PAIR(1));
     mvwprintw(window, 0, 1, psink->name.substr(0, width - 2).c_str());
