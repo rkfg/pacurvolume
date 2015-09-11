@@ -147,8 +147,13 @@ void TUI::run() {
         if (!handle_keys()) {
             break;
         }
-        if (sink_wrapper->get_external_change()) {
+        switch (sink_wrapper->get_external_change()) {
+        case FULL:
             update_panels();
+            break;
+        case REDRAW:
+            draw_windows();
+            break;
         }
     }
 }

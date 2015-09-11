@@ -54,6 +54,14 @@ void PAWrapper::add_sink(PSinkInfo sink) {
     sinks[sink->index] = wrap_sink(sink);
 }
 
+/* This function is only called from TUI::update_panels when a full sink inputs reload is required.
+ Monitor streams could be "garbage-collected" here if corresponding sink input is not alive anymore
+ However, it's not implemented. PA automatically destroys those streams but we still hold a pointer
+ to them in detectorStreams. If PA assigns the already used before stream index to a new sink input,
+ it won't be monitored. So this is a resource leak but I'm too lazy to check streams for existence.
+ Maybe later.
+*/
+
 void PAWrapper::collect_sinks() {
     pa_threaded_mainloop_lock(mainloop);
     sinks.clear();
@@ -67,7 +75,7 @@ void event_cb(pa_context *c, pa_subscription_event_type_t t, uint32_t idx,
         void *userdata) {
     if ((t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK)
             == PA_SUBSCRIPTION_EVENT_SINK_INPUT) {
-        get_object(userdata)->set_external_change();
+        get_object(userdata)->set_external_change(FULL);
     }
 }
 
@@ -129,11 +137,37 @@ shared_ptr<vector<PSink>> PAWrapper::list_sinks() {
     return result;
 }
 
+void read_monitor_cb(pa_stream *p, size_t nbytes, void *userdata) {
+    const void* data;
+    size_t size;
+    pa_stream_peek(p, &data, &size);
+    bool sound = false;
+    for (int i = 0; i < size; i++) {
+        if (((uint8_t*) data)[i] != 128) {
+            sound = true;
+        }
+    }
+    uint32_t idx = pa_stream_get_monitor_stream(p);
+    get_object(userdata)->set_sound_state(idx, sound);
+    pa_stream_drop(p);
+}
+
 PSink PAWrapper::wrap_sink(PSinkInfo sink) {
     string sink_name = string(sink->name);
+    PDetector detector = detectorStreams[sink->index];
+    if (detector == nullptr) {
+        pa_stream* detectorStream = pa_stream_new(context,
+                "Sound presence detector", &sampleSpec, NULL);
+        detector = PDetector(new Detector { detectorStream, false });
+        detectorStreams[sink->index] = detector;
+        pa_stream_set_monitor_stream(detectorStream, sink->index);
+        pa_stream_set_read_callback(detectorStream, &read_monitor_cb, this);
+        pa_stream_connect_record(detectorStream, NULL, NULL,
+                PA_STREAM_PEAK_DETECT);
+    }
     return PSink(
-            new Sink { sink->index, sink->client, "", sink_name, "", sink->mute == 1,
-                    sink->volume });
+            new Sink { sink->index, sink->client, "", sink_name, "", sink->mute
+                    == 1, sink->volume, detector->sound > 0 });
 }
 
 void PAWrapper::wait(pa_operation* o, bool debug) {
@@ -158,7 +192,6 @@ void PAWrapper::set_vol(unsigned int index, pa_cvolume* pvol) {
             pa_context_set_sink_input_volume(context, index, pvol, success_cb,
                     this));
     pa_threaded_mainloop_unlock(mainloop);
-    refresh_sink(index);
 }
 
 PSink PAWrapper::change_volume(unsigned int index, int change, bool inc) {
@@ -173,17 +206,17 @@ PSink PAWrapper::change_volume(unsigned int index, int change, bool inc) {
     return sinks[index];
 }
 
-void PAWrapper::set_external_change() {
-    external_change = true;
+void PAWrapper::set_external_change(change_type type) {
+    external_change = type;
 }
 
 void PAWrapper::set_client_name(const char* name) {
     client_name = string(name);
 }
 
-bool PAWrapper::get_external_change() {
-    bool result = external_change;
-    external_change = false;
+change_type PAWrapper::get_external_change() {
+    change_type result = external_change;
+    external_change = NONE;
     return result;
 }
 
@@ -194,6 +227,30 @@ PSink PAWrapper::set_volume(unsigned int index, int vol) {
 }
 
 PSink PAWrapper::toggle_mute(unsigned int index) {
-    pa_context_set_sink_input_mute(context, index, !sinks[index]->muted, NULL, NULL);
+    pa_context_set_sink_input_mute(context, index, !sinks[index]->muted, NULL,
+    NULL);
+    refresh_sink(index);
     return sinks[index];
+}
+
+void PAWrapper::set_sound_state(uint32_t idx, bool sound) {
+    PDetector detector = detectorStreams[idx];
+    if (detector == nullptr) {
+        return;
+    }
+    int8_t oldSound = detector->sound;
+    detector->sound += sound ? 1 : -1;
+    if (detector->sound > 10) {
+        detector->sound = 10;
+    }
+    if (detector->sound < 0) {
+        detector->sound = 0;
+    }
+    PSink sink = sinks[idx];
+    if (sink != nullptr) {
+        sink->sound = detector->sound > 0;
+        if ((bool) oldSound != sound) {
+            set_external_change(REDRAW);
+        }
+    }
 }

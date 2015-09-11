@@ -43,7 +43,11 @@ void Panel::redraw() {
     mvwprintw(window, 2, 1, "%sVolume: %d%%", muted.c_str(), volperc);
     wattroff(window, A_BOLD);
     wattroff(window, COLOR_PAIR(1));
-    mvwprintw(window, 0, 1, psink->name.substr(0, width - 2).c_str());
+    string name = psink->name;
+    if (psink->sound) {
+        name += " [+]";
+    }
+    mvwprintw(window, 0, 1, name.substr(0, width - 2).c_str());
     wnoutrefresh(window);
 }
 
