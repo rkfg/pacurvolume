@@ -80,6 +80,14 @@ bool TUI::handle_keys() {
             selectedPanel->update_sink(sink_wrapper->set_volume(selectedIdx,
             PA_VOLUME_NORM));
             break;
+        case '2':
+            selectedPanel->update_sink(sink_wrapper->set_volume(selectedIdx,
+            PA_VOLUME_NORM / 2));
+            break;
+        case '3':
+            selectedPanel->update_sink(sink_wrapper->set_volume(selectedIdx,
+            PA_VOLUME_NORM / 4));
+            break;
         case '0':
         case 'm':
             selectedPanel->update_sink(sink_wrapper->toggle_mute(selectedIdx));

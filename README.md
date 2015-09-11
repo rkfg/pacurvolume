@@ -1,4 +1,5 @@
 # pacurvolume
+
 PulseAudio ncurses volume control written in C++
 
 # Why?
@@ -17,6 +18,8 @@ Very few keys are used:
 |--------|--------------------------------------|
 | Arrows | Select sink inputs and change volume |
 | 1      | Reset sink input volume to 100%      |
+| 2      | Set sink input volume to 50%         |
+| 3      | Set sink input volume to 25%         |
 | m or 0 | Mute/unmute sink input               |
 | q      | Exit                                 |
 
@@ -29,6 +32,7 @@ Not so much but should be enough to feel comfortable.
 * Supports scrolling if you have lots of them or if the terminal window is too small
 * Supports Unicode, any non-ASCII sink input names should be displayed correctly
 * Has proper mouse wheel support, although it's not documented in ncurses and may misbehave
+* Shows sound activity per sink input with [+] symbol
 
 # Dependencies
 
