@@ -186,7 +186,7 @@ void PAWrapper::refresh_sink(uint32_t idx) {
     pa_threaded_mainloop_unlock(mainloop);
 }
 
-void PAWrapper::set_vol(unsigned int index, pa_cvolume* pvol) {
+void PAWrapper::set_vol(uint32_t index, pa_cvolume* pvol) {
     pa_threaded_mainloop_lock(mainloop);
     wait(
             pa_context_set_sink_input_volume(context, index, pvol, success_cb,
@@ -194,7 +194,7 @@ void PAWrapper::set_vol(unsigned int index, pa_cvolume* pvol) {
     pa_threaded_mainloop_unlock(mainloop);
 }
 
-PSink PAWrapper::change_volume(unsigned int index, int change, bool inc) {
+PSink PAWrapper::change_volume(uint32_t index, int change, bool inc) {
     PSink sink = sinks[index];
     pa_cvolume* pvol;
     if (inc) {
@@ -220,13 +220,13 @@ change_type PAWrapper::get_external_change() {
     return result;
 }
 
-PSink PAWrapper::set_volume(unsigned int index, int vol) {
+PSink PAWrapper::set_volume(uint32_t index, int vol) {
     pa_cvolume* pvol = &sinks[index]->volume;
     set_vol(index, pa_cvolume_set(pvol, pvol->channels, vol));
     return sinks[index];
 }
 
-PSink PAWrapper::toggle_mute(unsigned int index) {
+PSink PAWrapper::toggle_mute(uint32_t index) {
     pa_context_set_sink_input_mute(context, index, !sinks[index]->muted, NULL,
     NULL);
     refresh_sink(index);

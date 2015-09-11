@@ -61,7 +61,7 @@ private:
     string app_name;
     friend void complete(void* userdata);
     void wait(pa_operation* o, bool debug = false);
-    void set_vol(unsigned int index, pa_cvolume* pvol);
+    void set_vol(uint32_t index, pa_cvolume* pvol);
     volatile change_type external_change = NONE;
 public:
     PAWrapper(string app_name = "myapp");
@@ -73,9 +73,9 @@ public:
     void refresh_sink(uint32_t idx);
     unsigned int get_sinks_count();
     shared_ptr<vector<PSink>> list_sinks();
-    PSink change_volume(unsigned int index, int change, bool inc);
-    PSink set_volume(unsigned int index, int vol);
-    PSink toggle_mute(unsigned int index);
+    PSink change_volume(uint32_t index, int change, bool inc);
+    PSink set_volume(uint32_t index, int vol);
+    PSink toggle_mute(uint32_t index);
     void set_client_name(const char* name);
     void set_external_change(change_type type);
     change_type get_external_change();
